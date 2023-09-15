@@ -24,7 +24,7 @@ from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
-from customers.views import CustomerViewSet, CustomerOrderViewSet
+from customers.views import CustomerViewSet, CustomerOrderViewSet, home, advertisement
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -52,6 +52,9 @@ urlpatterns = [
 
     path('admin/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
+    path('', home, name='home'),
+    path('advertisement', advertisement, name='advertisements'),
+
 
     path('api/', include(router.urls)),
 ]
