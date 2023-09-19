@@ -1,0 +1,6 @@
+{% extends "wagtailusers/groups/edit.html" %}
+{% load wagtailusers_tags wagtailadmin_tags i18n %}
+
+{% block extra_fields %}
+    <li>{% include "wagtailadmin/shared/field.html" with field=form.categories %}</li>
+{% endblock extra_fields %}

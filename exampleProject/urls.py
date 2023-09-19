@@ -24,7 +24,8 @@ from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
-from customers.views import CustomerViewSet, CustomerOrderViewSet, home, advertisement
+from customers.views import CustomerViewSet, CustomerOrderViewSet, home, view_orders, \
+    advertisement_detail, advertisement_list, ItemViewSet, CategoryViewSet, CustomImageViewSet
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -36,12 +37,14 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
    public=True,
-   # permission_classes=(permissions.AllowAny,),
 )
 
 router = DefaultRouter()
 router.register(r'customers', CustomerViewSet)
 router.register(r'customer-orders', CustomerOrderViewSet)
+router.register("items",ItemViewSet)
+router.register("category",CategoryViewSet)
+router.register("image",CustomImageViewSet)
 
 urlpatterns = [
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -52,8 +55,10 @@ urlpatterns = [
 
     path('admin/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
-    path('', home, name='home'),
-    path('advertisement', advertisement, name='advertisements'),
+    path('home/', home, name='home'),
+    path('advertisement', advertisement_list, name='advertisements'),
+    path('view_orders/<int:customer_id>/', view_orders, name='view_orders'),
+    path('advertisement/<int:advertisement_id>/', advertisement_detail, name='advertisement_detail'),
 
 
     path('api/', include(router.urls)),

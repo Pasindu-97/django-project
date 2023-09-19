@@ -1,10 +1,9 @@
-{% extends "customers/base.html" %}
-
-{% load wagtailcore_tags %}
-
-{% block content %}
-  <h1>Advertisements</h1>
-  <div class="rich-text">
-    {{ "These are the existing advertisements"|richtext }}
+{% for advertisement in advertisements %}
+  <div class="card" style="background-color: {{ advertisement.colour }}">
+    <h2>{{ advertisement.title }}</h2>
+    <p>{{ advertisement.description }}</p>
+    <a href="{% url 'advertisement_detail' advertisement.id %}" class="btn btn-primary">Learn more</a>
   </div>
-{% endblock %}
+{% empty %}
+  <p>No advertisements found.</p>
+{% endfor %}

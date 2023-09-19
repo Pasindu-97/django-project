@@ -1,6 +1,13 @@
+import os
+
+from django.conf import settings
+from django.contrib.auth.models import Group
 from django.db import models
 from wagtail.admin.panels import FieldPanel
+from wagtail.images.models import AbstractImage, Image, AbstractRendition
 from wagtail.models import Page
+# from wagtail.users.forms import GroupForm as WagtailGroupForm
+# from django import forms
 
 
 class Customer(models.Model):
@@ -19,9 +26,15 @@ class CustomerOrder(models.Model):
 
 
 class AdvertisementItem(models.Model):
+    class Colours(models.TextChoices):
+        RED = "RED", "Red"
+        GREEN = "GREEN", "Green"
+        BLUE = "BLUE", "Blue"
+
     title = models.CharField("Title", max_length=255)
     description = models.CharField("Description", max_length=255)
     how_to_donate = models.CharField("How to Donate", max_length=255)
+    colour = models.CharField("Colour", max_length=15, choices=Colours.choices, default=Colours.RED)
 
 
 class HomePage(Page):
@@ -29,7 +42,7 @@ class HomePage(Page):
     page_title = models.CharField("Title", max_length=255, help_text="Enter a page title", default="Home Page")
     description = models.CharField("Description", max_length=255, help_text="Enter a page Description",
                                    default="Test Description")
-    content_panels = Page.content_panels + [FieldPanel("page_title")]
+    content_panels = Page.content_panels + [FieldPanel("page_title"), FieldPanel("description")]
 
 
 class Advertisement(Page):
@@ -37,12 +50,11 @@ class Advertisement(Page):
     page_title = models.CharField("Title", max_length=255, help_text="Enter an Advertisement Title")
     description = models.CharField("Description", max_length=255, help_text="Enter a Advertisement Description")
     how_to_donate = models.CharField("How to Donate", max_length=255, help_text="Enter a text for guidance")
-    content_panels = Page.content_panels + [FieldPanel("page_title"),FieldPanel("description"),FieldPanel("how_to_donate")]
+    content_panels = Page.content_panels + [FieldPanel("page_title"), FieldPanel("description"),
+                                            FieldPanel("how_to_donate")]
 
 
 class FlexPage(Page):
-    """Home page model."""
-
     templates = "customers/home_page.html"
     max_count = 1
 
@@ -52,6 +64,46 @@ class FlexPage(Page):
         FieldPanel("banner_title")
     ]
 
+
+class Category(models.Model):
+    name = models.CharField("Name", max_length=255)
+    groups = models.ManyToManyField(Group, verbose_name="Group", related_name="category", blank=True)
+
+
+
+
+class CustomImage(AbstractImage):
+    description = models.CharField("Description", max_length=255, blank=True, null=True)
+    ref_link = models.URLField("Reference Link", max_length=200, blank=True, null=True)
+    bg_color = models.CharField("Background Colour", max_length=7, blank=True, null=True)
+
+    admin_form_fields = Image.admin_form_fields + (
+        "description",
+        "ref_link",
+        "bg_color",
+    )
+
+
+class Item(models.Model):
+    name = models.CharField("Name", max_length=255)
+    category = models.ForeignKey(Category, on_delete=models.RESTRICT, related_name="items", verbose_name="Category")
+    images = models.ManyToManyField(Image, related_name="item", verbose_name="Images", blank=True)
+    visible = models.BooleanField("Visible", default=False)
+    price = models.DecimalField("Price", max_digits=7, decimal_places=2)
+    description = models.CharField("Description", max_length=1023)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.RESTRICT, related_name="item",
+                                   verbose_name="Created By")
+
+
+class Order(models.Model):
+    description = models.CharField("Description", max_length=1023)
+    items = models.ManyToManyField(Item)
+
+
+class CustomRendition(AbstractRendition):
+    image = models.ForeignKey(CustomImage, on_delete=models.CASCADE, related_name='renditions')
+
     class Meta:
-        verbose_name = "Home Page"
-        verbose_name_plural = "Home Pages"
+        unique_together = (
+            ('image', 'filter_spec', 'focal_point_key'),
+        )

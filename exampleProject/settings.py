@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'django-insecure-6^8ej-v+h9zhg_*jr9x$$1rxsu0gs)@tkun+o(3^kbzprji_##
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -41,12 +39,12 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'drf_yasg',
+    'users.apps.UsersConfig',
 
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
     'wagtail.embeds',
     'wagtail.sites',
-    'wagtail.users',
     'wagtail.snippets',
     'wagtail.documents',
     'wagtail.images',
@@ -60,6 +58,9 @@ INSTALLED_APPS = [
     'wagtail.contrib.modeladmin',
 
     'customers.apps.CustomersConfig',
+    'customers.apps.CustomUsersAppConfig'
+
+
 ]
 
 MIDDLEWARE = [
@@ -73,6 +74,7 @@ MIDDLEWARE = [
 
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
+AUTH_USER_MODEL = 'users.User'
 
 ROOT_URLCONF = 'exampleProject.urls'
 
@@ -101,12 +103,11 @@ WSGI_APPLICATION = 'exampleProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django_project_db',
+        'NAME': 'django_project_db-1',
         'USER': 'postgres',
         'PASSWORD': '0779641878',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -138,7 +139,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -148,7 +148,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 """FIREBASE CREDENTIALS"""
 FIREBASE_ACCOUNT_TYPE = "service_account"
@@ -162,7 +161,6 @@ FIREBASE_TOKEN_URI = "https://oauth2.googleapis.com/token",
 FIREBASE_AUTH_PROVIDER_X509_CERT_URL = "https://www.googleapis.com/oauth2/v1/certs"
 FIREBASE_CLIENT_X509_CERT_URL = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-o7qim%40example-project-c5bb1.iam.gserviceaccount.com"
 
-
 # WAGTAIL SETTINGS
 
 # This is the human-readable name of your Wagtail install
@@ -170,12 +168,12 @@ FIREBASE_CLIENT_X509_CERT_URL = "https://www.googleapis.com/robot/v1/metadata/x5
 WAGTAIL_SITE_NAME = 'My Project'
 
 # Replace the search backend
-#WAGTAILSEARCH_BACKENDS = {
+# WAGTAILSEARCH_BACKENDS = {
 #  'default': {
 #    'BACKEND': 'wagtail.search.backends.elasticsearch8',
 #    'INDEX': 'myapp'
 #  }
-#}
+# }
 
 # Wagtail email notifications from address
 # WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = 'wagtail@myhost.io'
@@ -187,3 +185,27 @@ WAGTAIL_SITE_NAME = 'My Project'
 TAGGIT_CASE_INSENSITIVE = True
 
 WAGTAILADMIN_BASE_URL = '/admin/'
+WAGTAILIMAGES_IMAGE_MODEL = 'customers.CustomImage'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'django_cognito_jwt.JSONWebTokenAuthentication',
+    ],
+}
+
+# AWS Configurations
+#
+AWS_STORAGE_BUCKET_NAME = 'example-site-bucket-2023'
+AWS_ACCESS_KEY_ID = 'AKIA3JEGTLJ2K7DOFSMP'
+AWS_SECRET_ACCESS_KEY = 'aXjjCykcT9sx9ylSGXyoFfBii+a1Wkh08yD+Ghn7'
+AWS_S3_REGION_NAME = 'us-west-1'
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+
+
+COGNITO_AWS_REGION = 'us-west-1'
+COGNITO_USER_POOL = 'us-west-1_w2sZHFw50'
+COGNITO_AUDIENCE = '7f6oab5k8tm9bu29uifadsse8e'
+

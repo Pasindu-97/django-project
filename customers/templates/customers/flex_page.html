@@ -3,7 +3,7 @@
 {% load wagtailcore_tags %}
 
 {% block content %}
-  <h1>{{self.page_title}}</h1>
+  <h1>{{self.banner_title}}</h1>
   <div class="rich-text">
     {{ "test description"|richtext }}
     <h1>Customer List</h1>
@@ -19,7 +19,6 @@
           <th>Date of Birth</th>
           <th>Currency Balance</th>
           <th>Page Visits</th>
-          <th>Orders</th>
         </tr>
       </thead>
       <tbody>
@@ -30,9 +29,6 @@
             <td>{{ customer.date_of_birth }}</td>
             <td>{{ customer.currency_balance }}</td>
             <td>{{ customer.page_visits }}</td>
-            <td>
-                <a href="{% url 'view_orders' customer.id %}" class="btn btn-primary">View</a>
-            </td>
           </tr>
         {% empty %}
           <tr>

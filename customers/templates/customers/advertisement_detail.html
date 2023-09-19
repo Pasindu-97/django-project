@@ -1,0 +1,11 @@
+{% extends "customers/base.html" %}
+
+{% load wagtailcore_tags %}
+
+{% block content %}
+  <h1>{{ advertisement.title }}</h1>
+  <div class="rich-text">
+    <p>{{ advertisement.description }}</p>
+    <p>{{ advertisement.how_to_donate }}</p>
+  </div>
+{% endblock %}
