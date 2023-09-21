@@ -1,0 +1,16 @@
+{% extends "modeladmin/edit.html" %}
+{% load static %}
+
+
+{% block content %}
+    {{ block.super }}
+    <div class="button" style="margin-left: 100px; margin-bottom: 100px;color: white">
+        <a style="color: white" href="{% url 'visibility' %}?pk={{instance.id}}" id="visible-button">
+            {% if instance.visible %}
+                Make Invisible
+            {% else %}
+                Make Visible
+            {% endif %}
+        </a>
+    </div>
+{% endblock %}

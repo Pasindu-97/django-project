@@ -3,8 +3,8 @@ from wagtail.users.apps import WagtailUsersAppConfig
 
 
 class CustomersConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'customers'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "customers"
 
 
 class CustomUsersAppConfig(WagtailUsersAppConfig):

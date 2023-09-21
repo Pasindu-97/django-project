@@ -1,22 +1,41 @@
 import django_filters
 from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
-from rest_framework import status, filters
+from django.shortcuts import get_object_or_404, render
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from wagtail.users.views.groups import GroupViewSet as WagtailGroupViewSet
 
-from customers.authentication import FirebaseAuthentication
+from customers.authentication import CognitoAuthentication
 from customers.filters import ItemFilter
 from customers.forms import GroupForm
-from customers.models import Customer, CustomerOrder, AdvertisementItem, Item, Category, Order, CustomImage
-from customers.serializers import CustomerSerializer, CustomerOrderSerializer, ItemSerializer, ItemViewSerializer, \
-    CategorySerializer, OrderSerializer, CustomImageSerializer
-
-from wagtail.users.views.groups import GroupViewSet as WagtailGroupViewSet
+from customers.models import (
+    AdvertisementItem,
+    Category,
+    Customer,
+    CustomerOrder,
+    CustomImage,
+    Item,
+    Order,
+)
+from customers.serializers import (
+    CategorySerializer,
+    CustomerOrderSerializer,
+    CustomerSerializer,
+    CustomImageSerializer,
+    CustomLoginResultSerializer,
+    CustomLoginSerializer,
+    ItemSerializer,
+    ItemViewSerializer,
+    OrderSerializer,
+    UserSerializer,
+)
+from users.models import User
 
 
 class CustomerViewSet(ModelViewSet):
@@ -31,12 +50,9 @@ class CustomerOrderViewSet(ModelViewSet):
 
 
 def home(request):
-    search_query = request.GET.get('search', '')
-    customers = Customer.objects.filter(
-        Q(first_name__icontains=search_query) |
-        Q(last_name__icontains=search_query)
-    )
-    return render(request, 'customers/home_page.html', {'customers': customers})
+    search_query = request.GET.get("search", "")
+    customers = Customer.objects.filter(Q(first_name__icontains=search_query) | Q(last_name__icontains=search_query))
+    return render(request, "customers/home_page.html", {"customers": customers})
 
 
 def view_orders(request, customer_id):
@@ -45,30 +61,30 @@ def view_orders(request, customer_id):
     orders = CustomerOrder.objects.filter(customer=customer)
 
     context = {
-        'customer': customer,
-        'orders': orders,
-        'title': f"Orders of {customer.first_name}",
-        'subtitle': 'Subtitle Here',
-        'description': 'Description Here',
+        "customer": customer,
+        "orders": orders,
+        "title": f"Orders of {customer.first_name}",
+        "subtitle": "Subtitle Here",
+        "description": "Description Here",
     }
 
-    return render(request, 'customers/customer_orders.html', context)
+    return render(request, "customers/customer_orders.html", context)
 
 
 def advertisement_detail(request, advertisement_id):
     advertisement = get_object_or_404(AdvertisementItem, pk=advertisement_id)
     context = {
-        'advertisement': advertisement,
+        "advertisement": advertisement,
     }
-    return render(request, 'customers/advertisement_detail.html', context)
+    return render(request, "customers/advertisement_detail.html", context)
 
 
 def advertisement_list(request):
     advertisements = AdvertisementItem.objects.all()
     context = {
-        'advertisements': advertisements,
+        "advertisements": advertisements,
     }
-    return render(request, 'customers/advertisements.html', context)
+    return render(request, "customers/advertisements.html", context)
 
 
 class ItemViewSet(ModelViewSet):
@@ -114,3 +130,23 @@ class CustomImageViewSet(ModelViewSet):
 class GroupViewSet(WagtailGroupViewSet):
     def get_form_class(self, for_update=False):
         return GroupForm
+
+
+class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class MyView(APIView):
+    def get_serializer(self, *args, **kwargs):
+        return CustomLoginSerializer(*args, **kwargs)
+
+    @swagger_auto_schema(responses={200: CustomLoginResultSerializer})
+    def post(self, request):
+        input_serializer = CustomLoginSerializer(request.data)
+        username = input_serializer.data["username"]
+        password = input_serializer.data["password"]
+        result = CognitoAuthentication.initiate_auth(request, username, password)
+        data = {"result": result}
+        serializer2 = CustomLoginResultSerializer(data)
+        return Response(serializer2.data)
