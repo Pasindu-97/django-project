@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from wagtail.users.views.groups import GroupViewSet as WagtailGroupViewSet
 
-from customers.authentication import CognitoAuthentication
+from customers.authentication import initiate_auth
 from customers.filters import ItemFilter
 from customers.forms import GroupForm
 from customers.models import (
@@ -41,10 +41,10 @@ from users.models import User
 class CustomerViewSet(ModelViewSet):
     serializer_class = CustomerSerializer
     queryset = Customer.objects.all()
+    permission_classes = [IsAuthenticated]
 
 
 class CustomerOrderViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
     serializer_class = CustomerOrderSerializer
     queryset = CustomerOrder.objects.all()
 
@@ -88,6 +88,7 @@ def advertisement_list(request):
 
 
 class ItemViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Item.objects.all()
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_class = ItemFilter
@@ -113,16 +114,19 @@ class ItemViewSet(ModelViewSet):
 
 
 class CategoryViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class OrderViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
 
 class CustomImageViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = CustomImage.objects.all()
     serializer_class = CustomImageSerializer
 
@@ -133,11 +137,12 @@ class GroupViewSet(WagtailGroupViewSet):
 
 
 class UserViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-class MyView(APIView):
+class LoginView(APIView):
     def get_serializer(self, *args, **kwargs):
         return CustomLoginSerializer(*args, **kwargs)
 
@@ -146,7 +151,7 @@ class MyView(APIView):
         input_serializer = CustomLoginSerializer(request.data)
         username = input_serializer.data["username"]
         password = input_serializer.data["password"]
-        result = CognitoAuthentication.initiate_auth(request, username, password)
+        result = initiate_auth(username, password)
         data = {"result": result}
         serializer2 = CustomLoginResultSerializer(data)
         return Response(serializer2.data)

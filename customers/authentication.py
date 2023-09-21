@@ -1,7 +1,3 @@
-import base64
-import hashlib
-import hmac
-
 import boto3
 import firebase_admin
 from botocore.exceptions import ClientError
@@ -56,63 +52,53 @@ class FirebaseAuthentication(BaseAuthentication):
         return user, None
 
 
+# ----------------------COGNITO--------------------------------------------
+
 client_id = "3jqqvqvven1qi3f7bd4f2m23r"
+region_name = "us-west-1"
+aws_access_key_id = "AKIA3JEGTLJ2K7DOFSMP"
+aws_secret_access_key = "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"
+user_pool_id = "us-west-1_GhENHgJYT"
+
+cidp = boto3.client(
+    "cognito-idp",
+    region_name=region_name,
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+)
 
 
-class CognitoAuthentication(BaseAuthentication):
-    def calculate_secret_hash(self, client_id, client_secret, username):
-        message = username + client_id
-        secret_hash = hmac.new(
-            str(client_secret).encode("utf-8"), msg=str(message).encode("utf-8"), digestmod=hashlib.sha256
-        ).digest()
-        secret_hash_base64 = base64.b64encode(secret_hash).decode()
-        return secret_hash_base64
-
-    def initiate_auth(self, username, password):
-        cidp = boto3.client(
-            "cognito-idp",
-            region_name="us-west-1",
-            aws_access_key_id="AKIA3JEGTLJ2K7DOFSMP",
-            aws_secret_access_key="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",
-        )
-        try:
-            response = cidp.initiate_auth(
-                AuthFlow="USER_PASSWORD_AUTH",
-                AuthParameters={
-                    "USERNAME": username,
-                    "PASSWORD": password,
-                },
-                ClientId=client_id,
-            )
-            return response
-        except ClientError as err:
-            print(err)
-            return "User does not exist"
-
-    def sign_up(self, username, password):
-        cidp = boto3.client(
-            "cognito-idp",
-            region_name="us-west-1",
-            aws_access_key_id="AKIA3JEGTLJ2K7DOFSMP",
-            aws_secret_access_key="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",
-        )
-
-        secret_hash = self.calculate_secret_hash(client_id, "", username)
-        response = cidp.sign_up(
+def initiate_auth(username, password):
+    try:
+        response = cidp.initiate_auth(
+            AuthFlow="USER_PASSWORD_AUTH",
+            AuthParameters={
+                "USERNAME": username,
+                "PASSWORD": password,
+            },
             ClientId=client_id,
-            SecretHash=secret_hash,
+        )
+        return response
+    except ClientError as err:
+        return str(err)
+
+
+def create_user(username):
+    try:
+        cidp.admin_create_user(
+            UserPoolId=user_pool_id,
             Username=username,
-            Password=password,
+            TemporaryPassword="Userpassword1@",
         )
+    except ClientError as err:
+        return str(err)
 
-        return response
 
-    def delete_user(self, token):
-        cidp = boto3.client(
-            "cognito-idp",
-            region_name="us-west-1",
-            aws_access_key_id="AKIA3JEGTLJ2K7DOFSMP",
-            aws_secret_access_key="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",
+def delete_user(username):
+    try:
+        cidp.admin_delete_user(
+            UserPoolId=user_pool_id,
+            Username=username,
         )
-        response = cidp.delete_user(AccessToken=token)
-        return response
+    except ClientError as err:
+        return str(err)

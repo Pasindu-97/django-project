@@ -28,7 +28,7 @@ from customers.views import (
     CustomerViewSet,
     CustomImageViewSet,
     ItemViewSet,
-    MyView,
+    LoginView,
     UserViewSet,
     advertisement_detail,
     advertisement_list,
@@ -67,6 +67,6 @@ urlpatterns = [
     path("advertisement", advertisement_list, name="advertisements"),
     path("view_orders/<int:customer_id>/", view_orders, name="view_orders"),
     path("advertisement/<int:advertisement_id>/", advertisement_detail, name="advertisement_detail"),
-    path("api/login/", MyView.as_view(), name="payhere_notify"),
+    path("api/login/", LoginView.as_view(), name="payhere_notify"),
     path("api/", include(router.urls)),
 ]

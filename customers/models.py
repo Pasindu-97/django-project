@@ -88,7 +88,7 @@ class Item(models.Model):
     price = models.DecimalField("Price", max_digits=7, decimal_places=2)
     description = models.CharField("Description", max_length=1023)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, models.RESTRICT, related_name="item", verbose_name="Created By"
+        settings.AUTH_USER_MODEL, models.RESTRICT, related_name="item", verbose_name="Created By", null=True, blank=True
     )
 
 

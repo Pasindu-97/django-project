@@ -3,7 +3,7 @@ from django.urls import path
 from wagtail import hooks
 from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
 
-from customers.authentication import CognitoAuthentication
+from customers.authentication import create_user, delete_user
 from customers.models import (
     Advertisement,
     AdvertisementItem,
@@ -79,7 +79,15 @@ class ItemAdmin(ModelAdmin):
     list_display = ("id", "name", "price", "created_by")
     list_filter = ("name",)
     search_fields = ("name", "price")
-    edit_template_name = "wagtailadmin/page/edit.html"
+    form_fields_exclude = ["visible", "created_by"]
+
+    def edit_view(self, request, instance_pk):
+        item = Item.objects.get(id=instance_pk)
+        if item.created_by != request.user:
+            kwargs = {"model_admin": self, "instance_pk": instance_pk}
+            view_class = self.edit_view_class
+            return view_class.as_view(**kwargs)(request)
+        return render(request, "wagtailadmin/page/edit.html")
 
 
 @hooks.register("register_admin_urls")
@@ -89,17 +97,6 @@ def urlpattern():
     ]
 
 
-def edit_item(self, item_id):
-    print("This is edit_item")
-    item = Item.objects.get(id=item_id)
-
-    context = {
-        "item": item,
-    }
-
-    return render(self, "wagtailadmin/page/edit.html", context)
-
-
 def admin_view(request):
     item_id = request.GET.get("pk")
     item = Item.objects.get(id=item_id)
@@ -107,7 +104,7 @@ def admin_view(request):
     item.save()
 
     context = {
-        "item": item,
+        "instance": item,
     }
 
     return render(request, "wagtailadmin/page/edit.html", context)
@@ -142,24 +139,19 @@ class AdvertisementListPageModelAdmin:
     exclude_from_explorer = False
 
 
+@hooks.register("after_create_user")
+def do_after_create_user(request, user):
+    create_user(user.username)
+
+
+@hooks.register("after_delete_user")
+def do_after_delete_user(request, user):
+    delete_user(user.username)
+
+
 modeladmin_register(CustomerAdmin)
 modeladmin_register(CustomerOrderAdmin)
 modeladmin_register(AdvertisementAdmin)
 modeladmin_register(ItemAdmin)
 modeladmin_register(CategoryAdmin)
 modeladmin_register(OrderAdmin)
-
-
-@hooks.register("after_create_user")
-def do_after_create_user(request, user):
-    CognitoAuthentication.sign_up(request, user.username, user.password)
-
-
-@hooks.register("after_edit_user")
-def do_after_edit_user(request, user):
-    CognitoAuthentication.sign_up(request, user.username, user.password)
-
-
-@hooks.register("after_delete_user")
-def do_after_delete_user(request, user):
-    CognitoAuthentication.delete_user(request, user.username)
