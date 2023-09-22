@@ -56,13 +56,7 @@ class Advertisement(Page):
     ]
 
 
-class FlexPage(Page):
-    templates = "customers/home_page.html"
-    max_count = 1
-
-    banner_title = models.CharField(max_length=100, blank=False, null=True)
-
-    content_panels = Page.content_panels + [FieldPanel("banner_title")]
+# ---------------------------Item-------------------------------------------
 
 
 class Category(models.Model):
