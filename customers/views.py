@@ -1,17 +1,14 @@
 import django_filters
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from wagtail.users.views.groups import GroupViewSet as WagtailGroupViewSet
 
-from customers.authentication import initiate_auth
 from customers.filters import ItemFilter
 from customers.forms import GroupForm
 from customers.models import (
@@ -28,23 +25,20 @@ from customers.serializers import (
     CustomerOrderSerializer,
     CustomerSerializer,
     CustomImageSerializer,
-    CustomLoginResultSerializer,
-    CustomLoginSerializer,
     ItemSerializer,
     ItemViewSerializer,
     OrderSerializer,
-    UserSerializer,
 )
-from users.models import User
 
 
 class CustomerViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = CustomerSerializer
     queryset = Customer.objects.all()
-    permission_classes = [IsAuthenticated]
 
 
 class CustomerOrderViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = CustomerOrderSerializer
     queryset = CustomerOrder.objects.all()
 
@@ -134,24 +128,3 @@ class CustomImageViewSet(ModelViewSet):
 class GroupViewSet(WagtailGroupViewSet):
     def get_form_class(self, for_update=False):
         return GroupForm
-
-
-class UserViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class LoginView(APIView):
-    def get_serializer(self, *args, **kwargs):
-        return CustomLoginSerializer(*args, **kwargs)
-
-    @swagger_auto_schema(responses={200: CustomLoginResultSerializer})
-    def post(self, request):
-        input_serializer = CustomLoginSerializer(request.data)
-        username = input_serializer.data["username"]
-        password = input_serializer.data["password"]
-        result = initiate_auth(username, password)
-        data = {"result": result}
-        serializer2 = CustomLoginResultSerializer(data)
-        return Response(serializer2.data)

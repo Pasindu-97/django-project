@@ -5,6 +5,8 @@ from wagtail.admin.panels import FieldPanel
 from wagtail.images.models import AbstractImage, AbstractRendition, Image
 from wagtail.models import Page
 
+from exampleProject.current_user import get_current_user
+
 
 class Customer(models.Model):
     first_name = models.CharField("First Name", max_length=31)
@@ -90,6 +92,11 @@ class Item(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, models.RESTRICT, related_name="item", verbose_name="Created By", null=True, blank=True
     )
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.created_by = get_current_user()
+        super().save(*args, **kwargs)
 
 
 class Order(models.Model):

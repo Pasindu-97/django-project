@@ -4,9 +4,17 @@ from botocore.exceptions import ClientError
 from django.conf import settings
 from django.contrib.auth.models import User
 from firebase_admin import auth, credentials
+from rest_framework import authentication
 from rest_framework.authentication import BaseAuthentication
 
 from customers import exceptions
+from exampleProject.settings import (
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    CLIENT_ID,
+    REGION_NAME,
+    USER_POOL_ID,
+)
 
 if settings.FIREBASE_PRIVATE_KEY is not None and isinstance(settings.FIREBASE_PRIVATE_KEY, str):
     private_key = settings.FIREBASE_PRIVATE_KEY.replace("\\n", "\n")
@@ -54,11 +62,11 @@ class FirebaseAuthentication(BaseAuthentication):
 
 # ----------------------COGNITO--------------------------------------------
 
-client_id = "3jqqvqvven1qi3f7bd4f2m23r"
-region_name = "us-west-1"
-aws_access_key_id = "AKIA3JEGTLJ2K7DOFSMP"
-aws_secret_access_key = "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"
-user_pool_id = "us-west-1_GhENHgJYT"
+client_id = CLIENT_ID
+region_name = REGION_NAME
+aws_access_key_id = AWS_ACCESS_KEY_ID
+aws_secret_access_key = AWS_SECRET_ACCESS_KEY
+user_pool_id = USER_POOL_ID
 
 cidp = boto3.client(
     "cognito-idp",
@@ -102,3 +110,25 @@ def delete_user(username):
         )
     except ClientError as err:
         return str(err)
+
+
+def set_password(username, password):
+    try:
+        cidp.admin_set_user_password(UserPoolId=user_pool_id, Username=username, Password=password, Permanent=True)
+        return "Set the new password"
+    except ClientError as err:
+        return str(err)
+
+
+class CognitoAuthentication(authentication.BaseAuthentication):
+    def authenticate(self, request):
+        token = request.META.get("Authorization")
+        if not token:
+            return None
+
+        try:
+            user = cidp.get_user(AccessToken=token)
+        except User.DoesNotExist:
+            raise exceptions.InvalidAuthToken("No such user")
+
+        return user, None

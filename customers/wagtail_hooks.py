@@ -1,9 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import redirect
 from django.urls import path
 from wagtail import hooks
 from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
 
-from customers.authentication import create_user, delete_user
 from customers.models import (
     Advertisement,
     AdvertisementItem,
@@ -87,7 +86,8 @@ class ItemAdmin(ModelAdmin):
             kwargs = {"model_admin": self, "instance_pk": instance_pk}
             view_class = self.edit_view_class
             return view_class.as_view(**kwargs)(request)
-        return render(request, "wagtailadmin/page/edit.html")
+        self.edit_template_name = "wagtailadmin/page/edit.html"
+        return super().edit_view(request, instance_pk)
 
 
 @hooks.register("register_admin_urls")
@@ -103,11 +103,7 @@ def admin_view(request):
     item.visible = not item.visible
     item.save()
 
-    context = {
-        "instance": item,
-    }
-
-    return render(request, "wagtailadmin/page/edit.html", context)
+    return redirect(f"itemadmin/edit/{item_id}")
 
 
 class CategoryAdmin(ModelAdmin):
@@ -137,16 +133,6 @@ class AdvertisementListPageModelAdmin:
     menu_order = 200
     add_to_settings_menu = False
     exclude_from_explorer = False
-
-
-@hooks.register("after_create_user")
-def do_after_create_user(request, user):
-    create_user(user.username)
-
-
-@hooks.register("after_delete_user")
-def do_after_delete_user(request, user):
-    delete_user(user.username)
 
 
 modeladmin_register(CustomerAdmin)

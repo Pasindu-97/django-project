@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from customers.models import Category, Customer, CustomerOrder, CustomImage, Item, Order
-from users.models import User
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -45,19 +44,4 @@ class OrderSerializer(serializers.ModelSerializer):
 class CustomImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomImage
-        fields = "__all__"
-
-
-class CustomLoginSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=20)
-    password = serializers.CharField(max_length=20)
-
-
-class CustomLoginResultSerializer(serializers.Serializer):
-    result = serializers.CharField(max_length=1024)
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
         fields = "__all__"

@@ -1,19 +1,3 @@
-"""
-URL configuration for exampleProject project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import include, path
 from drf_yasg import openapi
@@ -28,13 +12,12 @@ from customers.views import (
     CustomerViewSet,
     CustomImageViewSet,
     ItemViewSet,
-    LoginView,
-    UserViewSet,
     advertisement_detail,
     advertisement_list,
     home,
     view_orders,
 )
+from users.views import LoginView, SetPasswordView, UserViewSet
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -67,6 +50,7 @@ urlpatterns = [
     path("advertisement", advertisement_list, name="advertisements"),
     path("view_orders/<int:customer_id>/", view_orders, name="view_orders"),
     path("advertisement/<int:advertisement_id>/", advertisement_detail, name="advertisement_detail"),
-    path("api/login/", LoginView.as_view(), name="payhere_notify"),
+    path("api/login/", LoginView.as_view(), name="login"),
+    path("api/set_password/", SetPasswordView.as_view(), name="login"),
     path("api/", include(router.urls)),
 ]
