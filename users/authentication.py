@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from firebase_admin import auth, credentials
 from rest_framework import authentication
-from rest_framework.authentication import BaseAuthentication
+from rest_framework.authentication import BaseAuthentication, get_authorization_header
 
 from customers import exceptions
 from exampleProject.settings import (
@@ -122,7 +122,7 @@ def set_password(username, password):
 
 class CognitoAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
-        token = request.META.get("Authorization")
+        token = get_authorization_header(request).split()
         if not token:
             return None
 
