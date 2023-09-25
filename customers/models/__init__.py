@@ -1,2 +1,8 @@
-from customers.models.customers import Customer, CustomerOrder, Advertisement, AdvertisementItem, HomePage
-from customers.models.items import Item, CustomImage, Category, Order, CustomRendition
+from customers.models.customers import (
+    Advertisement,
+    AdvertisementItem,
+    Customer,
+    CustomerOrder,
+    HomePage,
+)
+from customers.models.items import Category, CustomImage, CustomRendition, Item, Order

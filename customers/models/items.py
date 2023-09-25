@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import models
-from wagtail.images.models import AbstractImage, Image, AbstractRendition
+from wagtail.images.models import AbstractImage, AbstractRendition, Image
 
 from exampleProject.current_user import get_current_user
 
