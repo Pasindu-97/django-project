@@ -75,7 +75,7 @@ class ItemAdmin(ModelAdmin):
     add_to_settings_menu = False
     exclude_from_explorer = False
     add_to_admin_menu = True
-    list_display = ("id", "name", "price", "created_by")
+    list_display = ("id", "name", "price", "created_by", "orders")
     list_filter = ("name",)
     search_fields = ("name", "price")
     form_fields_exclude = ["visible", "created_by"]
@@ -83,6 +83,7 @@ class ItemAdmin(ModelAdmin):
     def edit_view(self, request, instance_pk):
         item = Item.objects.get(id=instance_pk)
         if item.created_by != request.user:
+            self.edit_template_name = "wagtailadmin/page/edit_not_creator.html"
             kwargs = {"model_admin": self, "instance_pk": instance_pk}
             view_class = self.edit_view_class
             return view_class.as_view(**kwargs)(request)

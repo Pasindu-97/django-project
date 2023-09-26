@@ -26,7 +26,7 @@ class CustomImage(AbstractImage):
 class Item(models.Model):
     name = models.CharField("Name", max_length=255)
     category = models.ForeignKey(Category, on_delete=models.RESTRICT, related_name="items", verbose_name="Category")
-    images = models.ManyToManyField(Image, related_name="item", verbose_name="Images", blank=True)
+    images = models.ManyToManyField(CustomImage, related_name="item", verbose_name="Images", blank=True)
     visible = models.BooleanField("Visible", default=False)
     price = models.DecimalField("Price", max_digits=7, decimal_places=2)
     description = models.CharField("Description", max_length=1023)
@@ -42,7 +42,10 @@ class Item(models.Model):
 
 class Order(models.Model):
     description = models.CharField("Description", max_length=1023)
-    items = models.ManyToManyField(Item)
+    items = models.ManyToManyField(Item, related_name="orders")
+
+    def __str__(self):
+        return self.description
 
 
 class CustomRendition(AbstractRendition):

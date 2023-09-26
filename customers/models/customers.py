@@ -40,7 +40,7 @@ class HomePage(Page):
 
 
 class Advertisement(Page):
-    template = "/templates/customers/advertisement.html"
+    template = "customers/advertisement_detail.html"
     page_title = models.CharField("Title", max_length=255, help_text="Enter an Advertisement Title")
     description = models.CharField("Description", max_length=255, help_text="Enter a Advertisement Description")
     how_to_donate = models.CharField("How to Donate", max_length=255, help_text="Enter a text for guidance")

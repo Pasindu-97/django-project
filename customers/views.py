@@ -82,7 +82,7 @@ def advertisement_list(request):
 
 
 class ItemViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Item.objects.all()
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_class = ItemFilter
@@ -108,7 +108,7 @@ class ItemViewSet(ModelViewSet):
 
 
 class CategoryViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 

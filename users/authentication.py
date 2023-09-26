@@ -86,6 +86,7 @@ def initiate_auth(username, password):
             },
             ClientId=client_id,
         )
+        print("User Access Tokens: ", response)
         return response
     except ClientError as err:
         return str(err)
