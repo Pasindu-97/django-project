@@ -1,8 +1,9 @@
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework.routers import DefaultRouter
+from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
@@ -44,13 +45,15 @@ urlpatterns = [
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     path("django-admin/", admin.site.urls),
+    path("", include(wagtaildocs_urls)),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
-    path("home/", home, name="home"),
+    path("home-page/", home, name="home"),
     path("advertisement", advertisement_list, name="advertisements"),
     path("view_orders/<int:customer_id>/", view_orders, name="view_orders"),
     path("advertisement/<int:advertisement_id>/", advertisement_detail, name="advertisement_detail"),
     path("api/login/", LoginView.as_view(), name="login"),
     path("api/set_password/", SetPasswordView.as_view(), name="login"),
     path("api/", include(router.urls)),
+    re_path(r"^pages/", include(wagtail_urls)),
 ]

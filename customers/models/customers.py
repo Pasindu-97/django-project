@@ -32,15 +32,23 @@ class AdvertisementItem(models.Model):
 
 class HomePage(Page):
     template = "customers/home_page.html"
+    max_count = 1
     page_title = models.CharField("Title", max_length=255, help_text="Enter a page title", default="Home Page")
     description = models.CharField(
         "Description", max_length=255, help_text="Enter a page Description", default="Test Description"
     )
     content_panels = Page.content_panels + [FieldPanel("page_title"), FieldPanel("description")]
 
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+
+        context["customers"] = Customer.objects.all()
+        return context
+
 
 class Advertisement(Page):
-    template = "customers/advertisement_detail.html"
+    template = "customers/advertisements.html"
+    max_count = 1
     page_title = models.CharField("Title", max_length=255, help_text="Enter an Advertisement Title")
     description = models.CharField("Description", max_length=255, help_text="Enter a Advertisement Description")
     how_to_donate = models.CharField("How to Donate", max_length=255, help_text="Enter a text for guidance")
@@ -49,3 +57,9 @@ class Advertisement(Page):
         FieldPanel("description"),
         FieldPanel("how_to_donate"),
     ]
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+
+        context["advertisements"] = AdvertisementItem.objects.all()
+        return context

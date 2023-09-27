@@ -1,8 +1,10 @@
 import boto3
+import django
 import firebase_admin
 from botocore.exceptions import ClientError
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import ModelBackend
 from firebase_admin import auth, credentials
 from rest_framework import authentication
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
@@ -15,6 +17,8 @@ from exampleProject.settings import (
     REGION_NAME,
     USER_POOL_ID,
 )
+
+User = get_user_model()
 
 if settings.FIREBASE_PRIVATE_KEY is not None and isinstance(settings.FIREBASE_PRIVATE_KEY, str):
     private_key = settings.FIREBASE_PRIVATE_KEY.replace("\\n", "\n")
@@ -126,10 +130,10 @@ class CognitoAuthentication(authentication.BaseAuthentication):
         token = get_authorization_header(request).split()
         if not token:
             return None
-
         try:
+            token = token[0].decode("utf-8")
             user = cidp.get_user(AccessToken=token)
         except User.DoesNotExist:
             raise exceptions.InvalidAuthToken("No such user")
-
+        user = User.objects.get(username=user["Username"])
         return user, None

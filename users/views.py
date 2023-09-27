@@ -29,7 +29,6 @@ class LoginView(APIView):
         password = input_serializer.data["password"]
         result = initiate_auth(username, password)
         data = {"token": result["AuthenticationResult"]["AccessToken"]}
-        print("Data:", data)
         serializer2 = CustomLoginResultSerializer(data)
         return Response(serializer2.data)
 

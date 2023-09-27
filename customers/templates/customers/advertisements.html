@@ -1,9 +1,20 @@
-{% for advertisement in advertisements %}
-  <div class="card" style="background-color: {{ advertisement.colour }}">
-    <h2>{{ advertisement.title }}</h2>
-    <p>{{ advertisement.description }}</p>
-    <a href="{% url 'advertisement_detail' advertisement.id %}" class="btn btn-primary">Learn more</a>
-  </div>
-{% empty %}
-  <p>No advertisements found.</p>
-{% endfor %}
+
+{% extends "customers/base.html" %}
+
+{% load wagtailcore_tags %}
+
+<p>AAAA</p>
+{% block content %}
+    <h1>{{ self.page_title }}</h1>
+    <h2>{{ self.description }}</h2>
+    <h3>{{ self.how_to_donate }}</h3>
+    {% for advertisement in advertisements %}
+      <div class="card" style="background-color: {{ advertisement.colour }}">
+        <h2>{{ advertisement.title }}</h2>
+        <p>{{ advertisement.description }}</p>
+        <a href="{% url 'advertisement_detail' advertisement.id %}" class="btn btn-primary">Learn more</a>
+      </div>
+    {% empty %}
+      <p>No advertisements found.</p>
+    {% endfor %}
+{% endblock %}
